@@ -2,302 +2,939 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>Dragons Toro MC — Mod Library</title>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;500;600;700&family=Oxanium:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     :root {
-      --bg:       #08060f;
-      --bgc:      rgba(18,10,30,0.97);
-      --bdr:      #2d1a4a;
-      --cyan:     #22d3ee;
-      --cdim:     #0e7490;
-      --purple:   #a855f7;
-      --pdim:     #6b21a8;
-      --red:      #ef4444;
-      --gold:     #f59e0b;
-      --text:     #e2e8f0;
-      --muted:    #6b7280;
-      --dim:      #374151;
+      --dark-bg: #0a0a0f;
+      --darker: #050508;
+      --primary: #ff3e6c;
+      --primary-dark: #cc2f54;
+      --secondary: #00d4ff;
+      --secondary-dark: #0099cc;
+      --accent: #ffb347;
+      --purple: #9b4dff;
+      --gold: #ffd700;
+      --text: #ffffff;
+      --text-dim: #a0a0b0;
+      --text-muted: #6b6b7a;
+      --card-bg: rgba(20, 20, 35, 0.7);
+      --border-glow: rgba(255, 62, 108, 0.3);
+      --gradient-1: linear-gradient(135deg, #ff3e6c, #9b4dff);
+      --gradient-2: linear-gradient(135deg, #00d4ff, #0099cc);
+      --gradient-3: linear-gradient(135deg, #ffb347, #ff3e6c);
     }
+
     body {
-      background: var(--bg); color: var(--text);
-      font-family: 'Rajdhani', sans-serif;
-      background-image: radial-gradient(ellipse at 15% 10%, rgba(168,85,247,.07) 0%, transparent 55%),
-                        radial-gradient(ellipse at 85% 80%, rgba(34,211,238,.05) 0%, transparent 55%);
+      background: var(--dark-bg);
+      color: var(--text);
+      font-family: 'Exo 2', sans-serif;
+      overflow-x: hidden;
+      position: relative;
     }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-    @keyframes borderGlow { 0%,100% { box-shadow: 0 0 8px rgba(34,211,238,.3); } 50% { box-shadow: 0 0 18px rgba(168,85,247,.55); } }
-    
-    #navbar {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(8,6,15,.96);
-      border-bottom: 1.5px solid #2d1a4a;
-      padding: 0 20px; height: 68px;
-      display: flex; align-items: center; justify-content: space-between;
+
+    /* Animated Background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        repeating-linear-gradient(45deg, 
+          rgba(255, 62, 108, 0.02) 0px, 
+          rgba(255, 62, 108, 0.02) 2px,
+          transparent 2px,
+          transparent 8px),
+        radial-gradient(circle at 20% 50%, rgba(155, 77, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(0, 212, 255, 0.06) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    /* Floating particles */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .particle {
+      position: absolute;
+      background: var(--primary);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: float 15s infinite linear;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.3; }
+      90% { opacity: 0.3; }
+      100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--darker); }
+    ::-webkit-scrollbar-thumb { background: var(--gradient-1); border-radius: 4px; }
+
+    /* Navbar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5, 5, 8, 0.95);
       backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 62, 108, 0.3);
+      padding: 0 5%;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    #logo-wrap { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-    #logo-box {
-      width: 44px; height: 44px; border-radius: 10px; overflow: hidden;
-      border: 1.5px solid rgba(34,211,238,.4);
-      animation: borderGlow 3s ease-in-out infinite;
-      background: linear-gradient(135deg,#6b21a8,#0e7490);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 24px;
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: transform 0.3s;
     }
-    .ll1 { font-family: 'Press Start 2P', monospace; font-size: 9px; }
-    .ll1 .r { color: var(--red); } .ll1 .g { color: var(--gold); } .ll1 .c { color: var(--cyan); }
-    .ll2 { color: var(--purple); font-size: 10px; font-family: 'Oxanium', sans-serif; opacity: .7; }
-    
-    .nbtn {
-      padding: 8px 16px; border-radius: 8px; cursor: pointer;
-      font-family: 'Oxanium', sans-serif; font-size: 12px; font-weight: 700;
+
+    .logo:hover { transform: scale(1.02); }
+
+    .logo-icon {
+      width: 50px;
+      height: 50px;
+      background: var(--gradient-1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logo-icon::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+      transform: rotate(45deg);
+      animation: shine 3s infinite;
+    }
+
+    @keyframes shine {
+      0% { transform: translateX(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) rotate(45deg); }
+    }
+
+    .logo-text h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: 18px;
+      letter-spacing: 3px;
+    }
+
+    .logo-text h1 span:nth-child(1) { color: var(--primary); }
+    .logo-text h1 span:nth-child(2) { color: var(--gold); }
+    .logo-text h1 span:nth-child(3) { color: var(--secondary); }
+
+    .logo-text p {
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 2px;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      padding: 10px 24px;
+      border-radius: 30px;
+      font-family: 'Orbitron', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
       border: 1.5px solid;
+      background: transparent;
     }
-    .nbtn-cyan { background: linear-gradient(135deg,rgba(168,85,247,.2),rgba(34,211,238,.15)); border-color: var(--cyan); color: var(--cyan); }
-    .nbtn-purple { background: transparent; border-color: var(--purple); color: var(--purple); }
-    .nbtn-gray { background: transparent; border-color: #2d1a4a; color: var(--muted); }
-    
-    .page { display: none; }
-    .page.active { display: block; animation: fadeIn .25s ease; }
-    #login-page.active { display: flex; }
-    
-    #hero { text-align: center; padding: 56px 24px 36px; }
-    #hero-logo {
-      width: 80px; height: 80px; margin: 0 auto 20px; border-radius: 18px;
-      border: 2px solid rgba(34,211,238,.5);
-      background: linear-gradient(135deg,#6b21a8,#0e7490);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 40px; margin: 0 auto 20px;
+
+    .nav-btn-primary {
+      border-color: var(--primary);
+      color: var(--primary);
     }
-    #hero-title { font-family: 'Press Start 2P', monospace; font-size: clamp(14px,3.5vw,26px); margin-bottom: 8px; }
-    #hero-sub { font-family: 'Oxanium', sans-serif; font-size: 13px; color: var(--purple); margin-bottom: 36px; }
-    
-    #sw { max-width: 560px; margin: 0 auto 20px; position: relative; }
-    #sw .ico { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); }
-    #si {
-      width: 100%; padding: 13px 18px 13px 46px;
-      background: rgba(45,26,74,.25); border: 1.5px solid var(--bdr);
-      border-radius: 10px; color: var(--text); font-size: 15px;
-      font-family: 'Rajdhani', sans-serif; outline: none;
+
+    .nav-btn-primary:hover {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 0 20px rgba(255, 62, 108, 0.5);
     }
-    #si:focus { border-color: var(--cyan); }
-    
-    #cats { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px; }
+
+    .nav-btn-secondary {
+      border-color: var(--secondary);
+      color: var(--secondary);
+    }
+
+    .nav-btn-secondary:hover {
+      background: var(--secondary);
+      color: white;
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+    }
+
+    .nav-btn-outline {
+      border-color: rgba(255, 255, 255, 0.2);
+      color: var(--text-dim);
+    }
+
+    .nav-btn-outline:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* Pages */
+    .page {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .page.active { display: block; }
+    #login-page.active { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 80px); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 80px 20px 60px;
+      position: relative;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 8px 20px;
+      background: rgba(255, 62, 108, 0.1);
+      border: 1px solid rgba(255, 62, 108, 0.3);
+      border-radius: 50px;
+      font-size: 12px;
+      font-family: 'Orbitron', monospace;
+      margin-bottom: 30px;
+    }
+
+    .hero-icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 30px;
+      background: var(--gradient-1);
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 60px;
+      box-shadow: 0 0 40px rgba(255, 62, 108, 0.4);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .hero h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(24px, 5vw, 48px);
+      margin-bottom: 15px;
+    }
+
+    .hero h1 span:nth-child(1) { color: var(--primary); }
+    .hero h1 span:nth-child(2) { color: var(--gold); }
+    .hero h1 span:nth-child(3) { color: var(--secondary); }
+
+    .hero p {
+      color: var(--text-dim);
+      font-size: 14px;
+      letter-spacing: 2px;
+    }
+
+    /* Search */
+    .search-wrapper {
+      max-width: 600px;
+      margin: 40px auto 30px;
+      position: relative;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 16px 20px 16px 50px;
+      background: rgba(20, 20, 35, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50px;
+      color: var(--text);
+      font-size: 16px;
+      font-family: 'Exo 2', sans-serif;
+      transition: all 0.3s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 20px rgba(255, 62, 108, 0.2);
+    }
+
+    /* Categories */
+    .categories {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 50px;
+    }
+
     .cat-btn {
-      padding: 5px 14px; border-radius: 20px; cursor: pointer;
-      border: 1.5px solid #2d1a4a; background: transparent; color: var(--muted);
-      font-family: 'Oxanium', sans-serif; font-size: 12px; font-weight: 600;
-    }
-    .cat-btn.active { border-color: var(--cyan); background: rgba(34,211,238,.12); color: var(--cyan); }
-    
-    #mgw { max-width: 1200px; margin: 0 auto; padding: 0 20px 60px; }
-    #mg { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
-    #nr { text-align: center; color: var(--dim); padding: 80px 0; display: none; font-family: 'Press Start 2P', monospace; font-size: 11px; }
-    
-    .mc {
-      background: rgba(18,10,30,.92); border: 1.5px solid #2d1a4a;
-      border-radius: 13px; overflow: hidden; transition: all .2s; cursor: pointer;
-    }
-    .mc:hover { border-color: var(--cyan); transform: translateY(-4px); }
-    .ci { position: relative; }
-    .ci img { width: 100%; height: 175px; object-fit: cover; display: block; }
-    .cbg {
-      position: absolute; top: 9px; border-radius: 5px; padding: 3px 8px;
-      font-size: 10px; font-family: 'Oxanium', sans-serif;
-      background: rgba(8,6,15,.85);
-    }
-    .cbg-cat { left: 9px; border: 1px solid #6b21a8; color: var(--purple); }
-    .cbg-dl { right: 9px; border: 1px solid #0e7490; color: var(--cyan); }
-    .cb { padding: 14px; }
-    .ct { font-family: 'Oxanium', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 6px; }
-    .cd { color: #9ca3af; font-size: 13px; line-height: 1.5; margin-bottom: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .ca { display: flex; gap: 8px; }
-    .btn-dl {
-      flex: 1; text-align: center; padding: 10px;
-      background: linear-gradient(135deg,rgba(107,33,168,.5),rgba(14,116,144,.5));
-      border: 1.5px solid var(--cdim); border-radius: 7px; color: var(--cyan);
-      font-family: 'Oxanium', sans-serif; font-weight: 700; font-size: 12px;
+      padding: 8px 20px;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50px;
+      color: var(--text-dim);
+      font-family: 'Exo 2', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
       cursor: pointer;
+      transition: all 0.3s;
     }
-    .btn-dl:hover { border-color: var(--cyan); color: #fff; }
-    .btn-del { padding: 10px 12px; background: rgba(239,68,68,.08); border: 1.5px solid #7f1d1d; border-radius: 7px; color: #f87171; cursor: pointer; }
-    
-    .fl { display: block; color: var(--cyan); font-size: 12px; font-weight: 600; margin-bottom: 6px; font-family: 'Oxanium', sans-serif; }
-    .fi {
-      width: 100%; padding: 11px 14px;
-      background: rgba(45,26,74,.15); border: 1.5px solid var(--bdr);
-      border-radius: 7px; color: var(--text); font-size: 15px;
-      font-family: 'Rajdhani', sans-serif; outline: none;
+
+    .cat-btn:hover {
+      border-color: var(--secondary);
+      color: var(--secondary);
     }
-    .fi:focus { border-color: var(--cyan); }
-    .fg { margin-bottom: 16px; }
-    .btn-primary {
-      width: 100%; padding: 13px;
-      background: linear-gradient(135deg,#6b21a8,#0e7490);
-      border: 1.5px solid var(--cyan); border-radius: 9px; color: #fff;
-      font-size: 14px; font-family: 'Oxanium', sans-serif; font-weight: 700;
+
+    .cat-btn.active {
+      background: var(--gradient-1);
+      border-color: transparent;
+      color: white;
+    }
+
+    /* Mod Grid */
+    .mods-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 5% 60px;
+    }
+
+    .mods-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 25px;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 80px;
+      color: var(--text-dim);
+      font-family: 'Orbitron', monospace;
+      display: none;
+    }
+
+    /* Mod Card */
+    .mod-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.4s;
       cursor: pointer;
-    }
-    .btn-back { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 13px; font-family: 'Oxanium', sans-serif; padding: 8px; }
-    .btn-back:hover { color: var(--text); }
-    
-    .abox { background: var(--bgc); border: 1.5px solid #3b1f6e; border-radius: 18px; padding: 40px; width: 100%; max-width: 400px; margin: auto; }
-    .atitle { font-family: 'Press Start 2P', monospace; font-size: 11px; color: var(--purple); text-align: center; margin-bottom: 28px; }
-    .errmsg { color: #f87171; font-size: 13px; text-align: center; margin-bottom: 14px; display: none; }
-    .hint { text-align: center; margin-top: 10px; color: var(--dim); font-size: 11px; }
-    
-    #upload-page { max-width: 700px; margin: 0 auto; padding: 36px 24px 60px; }
-    .upbox { background: var(--bgc); border: 1.5px solid #3b1f6e; border-radius: 16px; padding: 32px; }
-    .okmsg { background: rgba(34,211,238,.08); border: 1.5px solid var(--cyan); border-radius: 8px; padding: 13px; text-align: center; color: var(--cyan); margin-bottom: 22px; display: none; }
-    
-    .img-area {
-      border: 2px dashed var(--bdr); border-radius: 10px;
-      padding: 24px; text-align: center; cursor: pointer;
       position: relative;
     }
-    .img-area:hover { border-color: var(--purple); background: rgba(168,85,247,.05); }
-    .img-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-    .img-area-icon { font-size: 28px; }
-    #img-preview { display: none; width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-top: 8px; cursor: pointer; }
-    
-    .dltabs { display: flex; gap: 8px; margin-bottom: 14px; }
-    .dltab {
-      flex: 1; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer;
-      border: 1.5px solid var(--bdr); background: transparent; color: var(--muted);
-      font-family: 'Oxanium', sans-serif;
+
+    .mod-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient-1);
+      transform: scaleX(0);
+      transition: transform 0.4s;
     }
-    .dltab.active { border-color: var(--cyan); background: rgba(34,211,238,.1); color: var(--cyan); }
-    .dlpanel { display: none; }
-    .dlpanel.active { display: block; }
-    
-    .fdrop {
-      border: 2px dashed var(--bdr); border-radius: 10px;
-      padding: 28px; text-align: center; cursor: pointer;
+
+    .mod-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(255, 62, 108, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .mod-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .card-image {
       position: relative;
+      height: 200px;
+      overflow: hidden;
     }
-    .fdrop:hover { border-color: var(--cyan); }
-    .fdrop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-    .fname { color: var(--cyan); margin-top: 8px; display: none; }
-    .tip { color: var(--muted); font-size: 12px; margin-top: 6px; }
-    .progress-bar { width: 100%; height: 6px; background: #2d1a4a; border-radius: 3px; overflow: hidden; margin-top: 10px; display: none; }
-    .progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg,var(--cyan),var(--purple)); transition: width .3s; }
-    
-    #mov {
-      position: fixed; inset: 0; z-index: 200;
-      background: rgba(0,0,0,.88); backdrop-filter: blur(12px);
-      display: none; align-items: center; justify-content: center; padding: 24px;
+
+    .card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s;
     }
-    #mov.active { display: flex; }
-    #mbox {
-      background: var(--bgc); border: 1.5px solid #3b1f6e;
-      border-radius: 18px; max-width: 520px; width: 100%; overflow: hidden;
+
+    .mod-card:hover .card-image img {
+      transform: scale(1.05);
     }
-    #mimg { width: 100%; height: 200px; object-fit: cover; }
-    #mbod { padding: 22px; }
-    #mname { font-family: 'Oxanium', sans-serif; font-weight: 800; font-size: 21px; margin-bottom: 8px; }
-    #mdesc { color: #9ca3af; font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
-    #mact { display: flex; gap: 10px; }
-    #mdlbtn {
-      flex: 1; text-align: center; padding: 13px;
-      background: linear-gradient(135deg,#6b21a8,#0e7490);
-      border: 1.5px solid var(--cyan); border-radius: 9px; color: #fff;
-      font-family: 'Oxanium', sans-serif; font-weight: 700; cursor: pointer;
+
+    .card-badges {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      right: 15px;
+      display: flex;
+      justify-content: space-between;
     }
-    #mclose { padding: 13px 18px; background: transparent; border: 1.5px solid #2d1a4a; border-radius: 9px; color: var(--muted); cursor: pointer; }
-    
-    footer { border-top: 1px solid #1a0f2e; padding: 24px; text-align: center; font-family: 'Press Start 2P', monospace; font-size: 8px; color: #2d1a4a; }
-    .r { color: var(--red); } .g { color: var(--gold); } .c { color: var(--cyan); }
-    @media (max-width: 480px) { #navbar { padding: 0 12px; } .upbox { padding: 22px 16px; } }
+
+    .badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      backdrop-filter: blur(5px);
+    }
+
+    .badge-category {
+      background: rgba(155, 77, 255, 0.8);
+      color: white;
+    }
+
+    .badge-type {
+      background: rgba(0, 212, 255, 0.8);
+      color: white;
+    }
+
+    .card-content {
+      padding: 20px;
+    }
+
+    .card-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .card-description {
+      color: var(--text-dim);
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .download-btn {
+      flex: 1;
+      padding: 12px;
+      background: var(--gradient-1);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-family: 'Orbitron', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .download-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 15px rgba(255, 62, 108, 0.5);
+    }
+
+    .delete-btn {
+      padding: 12px 18px;
+      background: rgba(255, 62, 108, 0.1);
+      border: 1px solid rgba(255, 62, 108, 0.3);
+      border-radius: 12px;
+      color: var(--primary);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .delete-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Login Box */
+    .login-box {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 30px;
+      padding: 50px;
+      width: 100%;
+      max-width: 450px;
+    }
+
+    .login-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      background: var(--gradient-1);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+    }
+
+    .login-title {
+      text-align: center;
+      font-family: 'Orbitron', monospace;
+      font-size: 14px;
+      margin-bottom: 30px;
+      color: var(--text-dim);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--secondary);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--secondary);
+    }
+
+    .error-msg {
+      color: var(--primary);
+      font-size: 12px;
+      text-align: center;
+      margin-bottom: 15px;
+      display: none;
+    }
+
+    .hint-text {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Upload Page */
+    .upload-container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 5%;
+    }
+
+    .upload-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .upload-box {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 30px;
+      padding: 40px;
+    }
+
+    .image-upload-area {
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .image-upload-area:hover {
+      border-color: var(--primary);
+      background: rgba(255, 62, 108, 0.05);
+    }
+
+    .image-preview {
+      display: none;
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 15px;
+      margin-top: 15px;
+    }
+
+    .file-upload-area {
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .file-upload-area:hover {
+      border-color: var(--secondary);
+    }
+
+    .tab-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tab-btn.active {
+      background: var(--gradient-1);
+      border-color: transparent;
+      color: white;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn 0.3s;
+    }
+
+    .success-msg {
+      background: rgba(0, 212, 255, 0.1);
+      border: 1px solid var(--secondary);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      color: var(--secondary);
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(15px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+      animation: fadeIn 0.3s;
+    }
+
+    .modal-content {
+      max-width: 550px;
+      width: 90%;
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 30px;
+      overflow: hidden;
+    }
+
+    .modal-image {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+    }
+
+    .modal-body {
+      padding: 30px;
+    }
+
+    .modal-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 24px;
+      margin-bottom: 15px;
+    }
+
+    .modal-desc {
+      color: var(--text-dim);
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 15px;
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 30px;
+      text-align: center;
+      font-size: 10px;
+      font-family: 'Orbitron', monospace;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 0 20px; }
+      .logo-text h1 { font-size: 14px; }
+      .nav-btn { padding: 6px 16px; font-size: 10px; }
+      .mods-grid { grid-template-columns: 1fr; }
+      .upload-box { padding: 25px; }
+    }
   </style>
 </head>
 <body>
 
-<nav id="navbar">
-  <div id="logo-wrap" onclick="go('home')">
-    <div id="logo-box">🐉</div>
-    <div><div class="ll1"><span class="r">DRAGONS </span><span class="g">TORO </span><span class="c">MC</span></div><div class="ll2">MOD LIBRARY</div></div>
+<div class="particles" id="particles"></div>
+
+<nav class="navbar">
+  <div class="logo" onclick="go('home')">
+    <div class="logo-icon">🐉</div>
+    <div class="logo-text">
+      <h1><span>DRAGONS</span> <span>TORO</span> <span>MC</span></h1>
+      <p>MOD LIBRARY</p>
+    </div>
   </div>
-  <div id="nav-btns">
-    <button class="nbtn nbtn-cyan" id="n-post" style="display:none" onclick="go('upload')">+ ĐĂNG MOD</button>
-    <button class="nbtn nbtn-purple" id="n-admin" onclick="go('login')">⚔ ADMIN</button>
-    <button class="nbtn nbtn-gray" id="n-logout" style="display:none" onclick="doLogout()">Đăng xuất</button>
+  <div class="nav-buttons">
+    <button class="nav-btn nav-btn-primary" id="postBtn" style="display:none" onclick="go('upload')"><i class="fas fa-plus"></i> ĐĂNG MOD</button>
+    <button class="nav-btn nav-btn-secondary" id="adminBtn" onclick="go('login')"><i class="fas fa-skull"></i> ADMIN</button>
+    <button class="nav-btn nav-btn-outline" id="logoutBtn" style="display:none" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> THOÁT</button>
   </div>
 </nav>
 
+<!-- HOME PAGE -->
 <div id="home-page" class="page active">
-  <div id="hero">
-    <div id="hero-logo">🐉</div>
-    <div id="hero-title"><span style="color:var(--red)">DRAGONS </span><span style="color:var(--gold)">TORO </span><span style="color:var(--cyan)">MC</span></div>
-    <div id="hero-sub">MOD LIBRARY — TẢI MOD MIỄN PHÍ</div>
-    <div id="sw"><span class="ico">🔍</span><input id="si" type="text" placeholder="Tìm kiếm mod..." oninput="render()" /></div>
-    <div id="cats"></div>
-  </div>
-  <div id="mgw"><div id="nr">Không tìm thấy mod nào...</div><div id="mg"></div></div>
-</div>
-
-<div id="login-page" class="page">
-  <div class="abox">
-    <div style="text-align:center; font-size:48px; margin-bottom:10px;">🐉</div>
-    <div class="atitle">ADMIN LOGIN</div>
-    <div class="fg"><label class="fl">Tài khoản</label><input class="fi" id="lu" type="text" placeholder="admin" /></div>
-    <div class="fg"><label class="fl">Mật khẩu</label><input class="fi" id="lp" type="password" placeholder="••••••••" /></div>
-    <div class="errmsg" id="lerr">⚠ Sai tài khoản hoặc mật khẩu!</div>
-    <button class="btn-primary" onclick="doLogin()">⚔ ĐĂNG NHẬP</button>
-    <div class="hint">admin / admin123</div>
-    <button class="btn-back" style="width:100%;margin-top:10px" onclick="go('home')">← Quay lại</button>
-  </div>
-</div>
-
-<div id="upload-page" class="page">
-  <div class="uph"><button class="btn-back" onclick="go('home')">←</button><h2 style="font-family:'Press Start 2P';font-size:11px;color:var(--cyan)">ĐĂNG MOD MỚI</h2></div>
-  <div class="upbox">
-    <div class="okmsg" id="upok">✓ Đăng mod thành công!</div>
-    <div class="fg"><label class="fl">Thể Loại *</label><select class="fi" id="ucat"><option>Fabric</option><option>Forge</option><option>OptiFine</option><option>Utility</option><option>World Gen</option><option>Magic</option><option>Tech</option><option>Adventure</option><option>Other</option></select></div>
-    <div class="fg"><label class="fl">Tên Mod *</label><input class="fi" id="un" type="text" placeholder="VD: OptiFine HD" /></div>
-    <div class="fg"><label class="fl">Ảnh Mod *</label><div class="img-area" id="img-area" onclick="document.getElementById('uif').click()"><div class="img-area-icon">🖼️</div><div>Bấm chọn ảnh</div><input type="file" id="uif" accept="image/*" onchange="prevImg(this)" /></div><img id="img-preview" onclick="document.getElementById('uif').click()" /></div>
-    <div class="fg"><label class="fl">Mô tả Mod *</label><textarea class="fi" id="ud" rows="3" placeholder="Mô tả ngắn về mod này..."></textarea></div>
-    <div class="fg"><label class="fl">Kiểu Tải Xuống *</label><div class="dltabs"><button class="dltab active" id="tab-link" onclick="switchTab('link')">🔗 Link ngoài</button><button class="dltab" id="tab-file" onclick="switchTab('file')">📦 Upload file mod</button></div>
-      <div class="dlpanel active" id="panel-link"><input class="fi" id="uu" type="text" placeholder="https://mediafire.com/... hoặc link bất kỳ" /><div class="tip">Người dùng bấm DOWNLOAD → mở link này trong tab mới</div></div>
-      <div class="dlpanel" id="panel-file"><div class="fdrop" id="fdrop"><input type="file" id="umf" accept=".jar,.zip,.rar,.7z" onchange="prevFile(this)" /><div class="fdrop-icon">📦</div><div>Bấm chọn file mod (.jar, .zip, .rar, .7z) — Tối đa 4GB</div><div class="fname" id="fname"></div></div><div class="progress-bar" id="progress-bar"><div class="progress-fill" id="progress-fill"></div></div><div class="tip">⚠ File lưu trong trình duyệt. Dữ liệu mất nếu xóa cache!</div></div>
+  <div class="hero">
+    <div class="hero-badge"><i class="fas fa-dragon"></i> SINCE 2024</div>
+    <div class="hero-icon">🐉</div>
+    <h1><span>DRAGONS</span> <span>TORO</span> <span>MC</span></h1>
+    <p>✦ MOD LIBRARY — TẢI MOD MIỄN PHÍ ✦</p>
+    
+    <div class="search-wrapper">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" class="search-input" id="searchInput" placeholder="Tìm kiếm mod..." oninput="render()">
     </div>
-    <button class="btn-primary" onclick="doUpload()">⬆ ĐĂNG MOD</button>
+    
+    <div class="categories" id="categories"></div>
+  </div>
+  
+  <div class="mods-container">
+    <div class="no-results" id="noResults">🔍 KHÔNG TÌM THẤY MOD NÀO</div>
+    <div class="mods-grid" id="modsGrid"></div>
   </div>
 </div>
 
-<div id="mov" onclick="closeModal()"><div id="mbox" onclick="event.stopPropagation()"><img id="mimg" src="" /><div id="mbod"><div id="mname"></div><div id="mdesc"></div><div id="mact"><button id="mdlbtn" onclick="doMDL()">⬇ DOWNLOAD</button><button id="mclose" onclick="closeModal()">Đóng</button></div></div></div></div>
+<!-- LOGIN PAGE -->
+<div id="login-page" class="page">
+  <div class="login-box">
+    <div class="login-icon">⚔</div>
+    <div class="login-title">ADMIN ACCESS</div>
+    <div class="form-group">
+      <label class="form-label"><i class="fas fa-user"></i> TÀI KHOẢN</label>
+      <input type="text" class="form-input" id="loginUser" placeholder="admin">
+    </div>
+    <div class="form-group">
+      <label class="form-label"><i class="fas fa-lock"></i> MẬT KHẨU</label>
+      <input type="password" class="form-input" id="loginPass" placeholder="••••••••">
+    </div>
+    <div class="error-msg" id="loginError">⚠ Sai tài khoản hoặc mật khẩu!</div>
+    <button class="download-btn" style="width:100%" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> ĐĂNG NHẬP</button>
+    <div class="hint-text">🔑 admin / admin123</div>
+    <button class="nav-btn-outline" style="width:100%; margin-top:15px; padding:10px" onclick="go('home')"><i class="fas fa-arrow-left"></i> QUAY LẠI</button>
+  </div>
+</div>
 
-<footer><span class="r">DRAGONS </span><span class="g">TORO </span><span class="c">MC</span> <span> • MOD LIBRARY © 2024</span></footer>
+<!-- UPLOAD PAGE -->
+<div id="upload-page" class="page">
+  <div class="upload-container">
+    <div class="upload-header">
+      <button class="nav-btn-outline" style="padding:8px 20px" onclick="go('home')"><i class="fas fa-arrow-left"></i> BACK</button>
+      <h2 style="font-family:'Orbitron'; font-size:18px"><i class="fas fa-upload"></i> ĐĂNG MOD MỚI</h2>
+    </div>
+    <div class="upload-box">
+      <div class="success-msg" id="successMsg">✓ Đăng mod thành công!</div>
+      
+      <div class="form-group">
+        <label class="form-label"><i class="fas fa-tag"></i> THỂ LOẠI</label>
+        <select class="form-input" id="modCategory">
+          <option>Fabric</option><option>Forge</option><option>OptiFine</option>
+          <option>Utility</option><option>World Gen</option><option>Magic</option>
+          <option>Tech</option><option>Adventure</option><option>Other</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label"><i class="fas fa-heading"></i> TÊN MOD</label>
+        <input type="text" class="form-input" id="modName" placeholder="VD: OptiFine HD">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label"><i class="fas fa-image"></i> ẢNH MOD</label>
+        <div class="image-upload-area" onclick="document.getElementById('imageInput').click()">
+          <i class="fas fa-cloud-upload-alt" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
+          <span>Bấm để chọn ảnh (JPG, PNG, GIF)</span>
+          <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="previewImage(this)">
+        </div>
+        <img id="imagePreview" class="image-preview">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label"><i class="fas fa-align-left"></i> MÔ TẢ</label>
+        <textarea class="form-input" id="modDesc" rows="4" placeholder="Mô tả chi tiết về mod..."></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label"><i class="fas fa-download"></i> KIỂU TẢI</label>
+        <div class="tab-buttons">
+          <button class="tab-btn active" onclick="switchTab('link')">🔗 LINK NGOÀI</button>
+          <button class="tab-btn" onclick="switchTab('file')">📦 UPLOAD FILE</button>
+        </div>
+        
+        <div class="tab-panel active" id="linkPanel">
+          <input type="text" class="form-input" id="linkUrl" placeholder="https://mediafire.com/...">
+          <div class="hint-text" style="margin-top:10px">📌 Người dùng bấm DOWNLOAD sẽ mở link này</div>
+        </div>
+        
+        <div class="tab-panel" id="filePanel">
+          <div class="file-upload-area" onclick="document.getElementById('fileInput').click()">
+            <i class="fas fa-file-archive" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
+            <span>Bấm để chọn file mod (.jar, .zip, .rar, .7z)</span>
+            <span style="font-size: 11px; display: block; margin-top: 5px; opacity:0.7">📦 Tối đa 4GB</span>
+            <input type="file" id="fileInput" accept=".jar,.zip,.rar,.7z" style="display:none" onchange="previewFile(this)">
+          </div>
+          <div id="fileName" style="color: var(--secondary); font-size: 12px; margin-top: 10px; text-align: center; display: none;"></div>
+          <div class="hint-text" style="margin-top:10px">⚠️ File lưu trong trình duyệt, sẽ mất nếu xóa cache</div>
+        </div>
+      </div>
+      
+      <button class="download-btn" style="width:100%; margin-top:10px" onclick="doUpload()"><i class="fas fa-rocket"></i> ĐĂNG MOD NGAY</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="modal" onclick="closeModal()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <img id="modalImage" class="modal-image" src="">
+    <div class="modal-body">
+      <h3 id="modalTitle" class="modal-title"></h3>
+      <p id="modalDesc" class="modal-desc"></p>
+      <div class="modal-actions">
+        <button class="download-btn" id="modalDownloadBtn" onclick="downloadCurrent()"><i class="fas fa-download"></i> DOWNLOAD</button>
+        <button class="delete-btn" onclick="closeModal()">ĐÓNG</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <i class="fas fa-dragon"></i> DRAGONS TORO MC MOD LIBRARY <i class="fas fa-gamepad"></i><br>
+  © 2024 - ALL RIGHTS RESERVED
+</footer>
 
 <script>
-// === TÀI KHOẢN ADMIN ===
+// === CONFIG ===
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'admin123';
 
 let isAdmin = false;
-let curCat = 'Tất cả';
+let currentCategory = 'Tất cả';
 let mods = [];
-let curMod = null;
-let dlType = 'link';
-let imgData = null;
+let currentMod = null;
+let uploadType = 'link';
+let imageData = null;
 let fileData = null;
-let fileName = null;
+let selectedFileName = null;
 
-const CATS = ['Tất cả','Fabric','Forge','OptiFine','Utility','World Gen','Magic','Tech','Adventure','Other'];
+const categories = ['Tất cả', 'Fabric', 'Forge', 'OptiFine', 'Utility', 'World Gen', 'Magic', 'Tech', 'Adventure', 'Other'];
 
-// IndexedDB cho file lớn
+// IndexedDB
 let db = null;
-const DB_NAME = 'DTMC_Mods';
-const STORE_NAME = 'mods';
+const DB_NAME = 'DTMC_Mods_V2';
+const STORE_NAME = 'mods_store';
 
-function openDB() {
+function initDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onerror = () => reject(req.error);
-    req.onsuccess = () => { db = req.result; resolve(); };
-    req.onupgradeneeded = (e) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      db = request.result;
+      resolve();
+    };
+    request.onupgradeneeded = (e) => {
       if (!e.target.result.objectStoreNames.contains(STORE_NAME)) {
         e.target.result.createObjectStore(STORE_NAME, { keyPath: 'id' });
       }
@@ -310,16 +947,18 @@ async function saveMods() {
   const tx = db.transaction(STORE_NAME, 'readwrite');
   const store = tx.objectStore(STORE_NAME);
   store.clear();
-  for (const mod of mods) store.put({ ...mod });
+  for (const mod of mods) {
+    store.put({ ...mod });
+  }
 }
 
-async function loadMods() {
+async function loadModsFromDB() {
   if (!db) return [];
   return new Promise((resolve) => {
     const tx = db.transaction(STORE_NAME, 'readonly');
-    const req = tx.objectStore(STORE_NAME).getAll();
-    req.onsuccess = () => resolve(req.result || []);
-    req.onerror = () => resolve([]);
+    const request = tx.objectStore(STORE_NAME).getAll();
+    request.onsuccess = () => resolve(request.result || []);
+    request.onerror = () => resolve([]);
   });
 }
 
@@ -330,201 +969,279 @@ async function deleteModFromDB(id) {
 }
 
 // Sample data
-const SAMPLE = [
-  { id: 1, name: 'OptiFine HD', desc: 'Tối ưu đồ họa Minecraft, hỗ trợ shader, tăng FPS đáng kể.', image: 'https://placehold.co/400x220/1a0a2e/22d3ee?text=OptiFine+HD', dlType: 'link', dlUrl: 'https://optifine.net', cat: 'OptiFine' },
-  { id: 2, name: 'JEI — Just Enough Items', desc: 'Xem công thức craft của tất cả item trong game.', image: 'https://placehold.co/400x220/200a2e/a855f7?text=JEI+Mod', dlType: 'link', dlUrl: 'https://www.curseforge.com', cat: 'Utility' }
+const sampleMods = [
+  { id: 1, name: 'OptiFine HD', desc: 'Tối ưu đồ họa Minecraft, hỗ trợ shader, tăng FPS đáng kể. Mod thiết yếu cho mọi game thủ.', image: 'https://placehold.co/400x220/ff3e6c/ffffff?text=OptiFine+HD', dlType: 'link', dlUrl: 'https://optifine.net', cat: 'OptiFine' },
+  { id: 2, name: 'JEI - Just Enough Items', desc: 'Xem công thức craft của tất cả item trong game. Không thể thiếu khi chơi modpack.', image: 'https://placehold.co/400x220/9b4dff/ffffff?text=JEI+Mod', dlType: 'link', dlUrl: 'https://www.curseforge.com', cat: 'Utility' },
+  { id: 3, name: 'Biomes O\' Plenty', desc: 'Thêm hơn 80 biome mới vào thế giới Minecraft với cây cối, hoa và sinh vật độc đáo.', image: 'https://placehold.co/400x220/ffb347/ffffff?text=Biomes', dlType: 'link', dlUrl: 'https://www.curseforge.com', cat: 'World Gen' }
 ];
 
 async function init() {
-  await openDB();
-  const loaded = await loadMods();
+  await initDB();
+  const loaded = await loadModsFromDB();
   if (loaded.length === 0) {
-    mods = SAMPLE;
+    mods = sampleMods;
     await saveMods();
   } else {
-    mods = loaded.sort((a,b) => b.id - a.id);
+    mods = loaded.sort((a, b) => b.id - a.id);
   }
-  buildCats();
+  renderCategories();
   render();
+  createParticles();
 }
 
-function buildCats() {
-  const w = document.getElementById('cats');
-  w.innerHTML = '';
-  CATS.forEach(c => {
-    const b = document.createElement('button');
-    b.className = 'cat-btn' + (c === curCat ? ' active' : '');
-    b.textContent = c;
-    b.onclick = () => { curCat = c; buildCats(); render(); };
-    w.appendChild(b);
+function renderCategories() {
+  const container = document.getElementById('categories');
+  container.innerHTML = '';
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (cat === currentCategory ? ' active' : '');
+    btn.textContent = cat;
+    btn.onclick = () => {
+      currentCategory = cat;
+      renderCategories();
+      render();
+    };
+    container.appendChild(btn);
   });
 }
 
 function render() {
-  const q = (document.getElementById('si').value || '').toLowerCase();
-  const list = mods.filter(m => (m.name.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q)) && (curCat === 'Tất cả' || m.cat === curCat));
-  const grid = document.getElementById('mg');
-  const nr = document.getElementById('nr');
-  grid.innerHTML = '';
-  if (!list.length) { nr.style.display = 'block'; return; }
-  nr.style.display = 'none';
-  list.forEach(m => {
-    const div = document.createElement('div');
-    div.className = 'mc';
-    const badge = m.dlType === 'file' ? '📦 Có file' : '🔗 Link';
-    div.innerHTML = `
-      <div class="ci" onclick="openModal(${m.id})">
-        <img src="${escapeHtml(m.image)}" onerror="this.src='https://placehold.co/400x220/1a0a2e/22d3ee?text=No+Image'" />
-        <div class="cbg cbg-cat">${escapeHtml(m.cat)}</div>
-        <div class="cbg cbg-dl">${badge}</div>
-      </div>
-      <div class="cb">
-        <div class="ct" onclick="openModal(${m.id})">${escapeHtml(m.name)}</div>
-        <div class="cd">${escapeHtml(m.desc)}</div>
-        <div class="ca">
-          <button class="btn-dl" onclick="dl(${m.id},event)">⬇ DOWNLOAD</button>
-          ${isAdmin ? `<button class="btn-del" onclick="del(${m.id},event)">🗑</button>` : ''}
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = mods.filter(mod => 
+    (mod.name.toLowerCase().includes(searchTerm) || mod.desc.toLowerCase().includes(searchTerm)) &&
+    (currentCategory === 'Tất cả' || mod.cat === currentCategory)
+  );
+  
+  const grid = document.getElementById('modsGrid');
+  const noResults = document.getElementById('noResults');
+  
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    noResults.style.display = 'block';
+    return;
+  }
+  
+  noResults.style.display = 'none';
+  grid.innerHTML = filtered.map(mod => `
+    <div class="mod-card" onclick="openModal(${mod.id})">
+      <div class="card-image">
+        <img src="${escapeHtml(mod.image)}" onerror="this.src='https://placehold.co/400x220/333/666?text=No+Image'">
+        <div class="card-badges">
+          <span class="badge badge-category">${escapeHtml(mod.cat)}</span>
+          <span class="badge badge-type">${mod.dlType === 'file' ? '📦 FILE' : '🔗 LINK'}</span>
         </div>
-      </div>`;
-    grid.appendChild(div);
+      </div>
+      <div class="card-content">
+        <div class="card-title">${escapeHtml(mod.name)}</div>
+        <div class="card-description">${escapeHtml(mod.desc)}</div>
+        <div class="card-actions">
+          <button class="download-btn" onclick="event.stopPropagation(); downloadMod(${mod.id})"><i class="fas fa-download"></i> DOWNLOAD</button>
+          ${isAdmin ? `<button class="delete-btn" onclick="event.stopPropagation(); deleteMod(${mod.id})"><i class="fas fa-trash"></i></button>` : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
   });
 }
 
-function escapeHtml(s) { return String(s||'').replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
-
-function dl(id, e) {
-  if(e) e.stopPropagation();
-  const m = mods.find(m => m.id === id);
-  if(!m) return;
-  if(m.dlType === 'link') window.open(m.dlUrl, '_blank');
-  else if(m.dlType === 'file' && m.fileData) {
+function downloadMod(id) {
+  const mod = mods.find(m => m.id === id);
+  if (!mod) return;
+  if (mod.dlType === 'link') {
+    window.open(mod.dlUrl, '_blank');
+  } else if (mod.dlType === 'file' && mod.fileData) {
     const a = document.createElement('a');
-    a.href = m.fileData;
-    a.download = m.fileName || m.name + '.jar';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    a.href = mod.fileData;
+    a.download = mod.fileName || mod.name + '.jar';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 }
 
 function openModal(id) {
-  curMod = mods.find(m => m.id === id);
-  if(!curMod) return;
-  document.getElementById('mimg').src = curMod.image;
-  document.getElementById('mname').innerHTML = escapeHtml(curMod.name);
-  document.getElementById('mdesc').innerHTML = escapeHtml(curMod.desc);
-  document.getElementById('mov').classList.add('active');
+  currentMod = mods.find(m => m.id === id);
+  if (!currentMod) return;
+  document.getElementById('modalImage').src = currentMod.image;
+  document.getElementById('modalTitle').innerHTML = escapeHtml(currentMod.name);
+  document.getElementById('modalDesc').innerHTML = escapeHtml(currentMod.desc);
+  document.getElementById('modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
-function closeModal() { document.getElementById('mov').classList.remove('active'); }
-function doMDL() { if(curMod) dl(curMod.id, null); }
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function downloadCurrent() {
+  if (currentMod) downloadMod(currentMod.id);
+}
 
 function go(page) {
-  ['home','login','upload'].forEach(p => document.getElementById(p+'-page').classList.remove('active'));
-  document.getElementById(page+'-page').classList.add('active');
-  window.scrollTo(0,0);
+  ['home', 'login', 'upload'].forEach(p => {
+    document.getElementById(p + '-page').classList.remove('active');
+  });
+  document.getElementById(page + '-page').classList.add('active');
+  window.scrollTo(0, 0);
 }
 
 function doLogin() {
-  const u = document.getElementById('lu').value.trim();
-  const p = document.getElementById('lp').value;
-  if(u === ADMIN_USER && p === ADMIN_PASS) {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const error = document.getElementById('loginError');
+  
+  if (user === ADMIN_USER && pass === ADMIN_PASS) {
     isAdmin = true;
-    document.getElementById('n-post').style.display = '';
-    document.getElementById('n-admin').style.display = 'none';
-    document.getElementById('n-logout').style.display = '';
+    error.style.display = 'none';
+    document.getElementById('postBtn').style.display = '';
+    document.getElementById('adminBtn').style.display = 'none';
+    document.getElementById('logoutBtn').style.display = '';
     go('home');
     render();
   } else {
-    document.getElementById('lerr').style.display = 'block';
+    error.style.display = 'block';
   }
 }
 
 function doLogout() {
   isAdmin = false;
-  document.getElementById('n-post').style.display = 'none';
-  document.getElementById('n-admin').style.display = '';
-  document.getElementById('n-logout').style.display = 'none';
+  document.getElementById('postBtn').style.display = 'none';
+  document.getElementById('adminBtn').style.display = '';
+  document.getElementById('logoutBtn').style.display = 'none';
   go('home');
   render();
 }
 
-function switchTab(t) {
-  dlType = t;
-  document.getElementById('tab-link').classList.toggle('active', t==='link');
-  document.getElementById('tab-file').classList.toggle('active', t==='file');
-  document.getElementById('panel-link').classList.toggle('active', t==='link');
-  document.getElementById('panel-file').classList.toggle('active', t==='file');
+function switchTab(type) {
+  uploadType = type;
+  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', (type === 'link' && i === 0) || (type === 'file' && i === 1));
+  });
+  document.getElementById('linkPanel').classList.toggle('active', type === 'link');
+  document.getElementById('filePanel').classList.toggle('active', type === 'file');
 }
 
-function prevImg(input) {
-  if(!input.files || !input.files[0]) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    imgData = e.target.result;
-    const prev = document.getElementById('img-preview');
-    prev.src = imgData; prev.style.display = 'block';
-    document.getElementById('img-area').style.display = 'none';
-  };
-  reader.readAsDataURL(input.files[0]);
+function previewImage(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      imageData = e.target.result;
+      const preview = document.getElementById('imagePreview');
+      preview.src = imageData;
+      preview.style.display = 'block';
+      document.querySelector('.image-upload-area').style.display = 'none';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
 }
 
-function prevFile(input) {
-  if(!input.files || !input.files[0]) return;
-  const f = input.files[0];
-  fileName = f.name;
-  document.getElementById('fname').textContent = '✅ ' + fileName;
-  document.getElementById('fname').style.display = 'block';
-  document.getElementById('fdrop').classList.add('has');
-  
-  const reader = new FileReader();
-  reader.onload = e => { fileData = e.target.result; };
-  reader.readAsDataURL(f);
+function previewFile(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    selectedFileName = file.name;
+    document.getElementById('fileName').textContent = `✅ ${selectedFileName}`;
+    document.getElementById('fileName').style.display = 'block';
+    document.querySelector('.file-upload-area').style.borderColor = 'var(--secondary)';
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      fileData = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
 }
 
 async function doUpload() {
-  const name = document.getElementById('un').value.trim();
-  const desc = document.getElementById('ud').value.trim();
-  const cat = document.getElementById('ucat').value;
-  if(!name) { alert('Vui lòng nhập tên mod!'); return; }
-  if(!desc) { alert('Vui lòng nhập mô tả!'); return; }
-  if(!imgData) { alert('Vui lòng chọn ảnh mod!'); return; }
+  const name = document.getElementById('modName').value.trim();
+  const desc = document.getElementById('modDesc').value.trim();
+  const cat = document.getElementById('modCategory').value;
   
-  const newMod = { id: Date.now(), name, desc, image: imgData, cat, dlType };
-  if(dlType === 'link') {
-    const url = document.getElementById('uu').value.trim();
-    if(!url) { alert('Vui lòng nhập link tải!'); return; }
+  if (!name) { alert('❌ Vui lòng nhập tên mod!'); return; }
+  if (!desc) { alert('❌ Vui lòng nhập mô tả!'); return; }
+  if (!imageData) { alert('❌ Vui lòng chọn ảnh mod!'); return; }
+  
+  const newMod = {
+    id: Date.now(),
+    name: name,
+    desc: desc,
+    image: imageData,
+    cat: cat,
+    dlType: uploadType
+  };
+  
+  if (uploadType === 'link') {
+    const url = document.getElementById('linkUrl').value.trim();
+    if (!url) { alert('❌ Vui lòng nhập link tải!'); return; }
     newMod.dlUrl = url;
   } else {
-    if(!fileData) { alert('Vui lòng chọn file mod!'); return; }
+    if (!fileData) { alert('❌ Vui lòng chọn file mod!'); return; }
     newMod.fileData = fileData;
-    newMod.fileName = fileName || name + '.jar';
+    newMod.fileName = selectedFileName || name + '.jar';
   }
   
   mods.unshift(newMod);
   await saveMods();
   
   // Reset form
-  document.getElementById('un').value = '';
-  document.getElementById('ud').value = '';
-  document.getElementById('uu').value = '';
-  document.getElementById('umf').value = '';
-  document.getElementById('img-preview').style.display = 'none';
-  document.getElementById('img-area').style.display = 'flex';
-  document.getElementById('fname').style.display = 'none';
-  document.getElementById('fdrop').classList.remove('has');
-  imgData = null; fileData = null;
+  document.getElementById('modName').value = '';
+  document.getElementById('modDesc').value = '';
+  document.getElementById('linkUrl').value = '';
+  document.getElementById('imagePreview').style.display = 'none';
+  document.querySelector('.image-upload-area').style.display = 'flex';
+  document.getElementById('fileName').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+  imageData = null;
+  fileData = null;
   switchTab('link');
   
-  const ok = document.getElementById('upok');
-  ok.style.display = 'block';
-  setTimeout(() => { ok.style.display = 'none'; go('home'); render(); }, 1500);
+  const successMsg = document.getElementById('successMsg');
+  successMsg.style.display = 'block';
+  setTimeout(() => {
+    successMsg.style.display = 'none';
+    go('home');
+    render();
+  }, 1500);
 }
 
-async function del(id, e) {
-  e.stopPropagation();
-  if(!confirm('Xóa mod này?')) return;
+async function deleteMod(id) {
+  if (!confirm('⚠️ Bạn có chắc chắn muốn xóa mod này?')) return;
   mods = mods.filter(m => m.id !== id);
   await deleteModFromDB(id);
   render();
 }
+
+function createParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 50; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    const size = Math.random() * 3 + 1;
+    particle.style.width = size + 'px';
+    particle.style.height = size + 'px';
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.animationDelay = Math.random() * 20 + 's';
+    particle.style.animationDuration = Math.random() * 20 + 10 + 's';
+    particle.style.background = `hsl(${Math.random() * 60 + 300}, 100%, 60%)`;
+    container.appendChild(particle);
+  }
+}
+
+// Event listeners
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter' && document.getElementById('login-page').classList.contains('active')) {
+    doLogin();
+  }
+});
 
 init();
 </script>
