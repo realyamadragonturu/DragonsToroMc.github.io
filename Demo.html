@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dragons Toro MC — Mod Library</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;500;600;700&family=Oxanium:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #08060f;
+      --bgc:      rgba(18,10,30,0.97);
+      --bdr:      #2d1a4a;
+      --cyan:     #22d3ee;
+      --cdim:     #0e7490;
+      --purple:   #a855f7;
+      --pdim:     #6b21a8;
+      --red:      #ef4444;
+      --gold:     #f59e0b;
+      --text:     #e2e8f0;
+      --muted:    #6b7280;
+      --dim:      #374151;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Rajdhani', sans-serif; min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse at 15% 10%, rgba(168,85,247,.07) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 80%, rgba(34,211,238,.05) 0%, transparent 55%),
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(168,85,247,.025) 39px, rgba(168,85,247,.025) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(34,211,238,.015) 39px, rgba(34,211,238,.015) 40px);
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #08060f; }
+    ::-webkit-scrollbar-thumb { background: #2d1a4a; border-radius: 3px; }
+
+    @keyframes glowPulse {
+      0%,100% { text-shadow: 0 0 10px rgba(34,211,238,.6), 0 0 30px rgba(34,211,238,.3); }
+      50%      { text-shadow: 0 0 20px rgba(168,85,247,.8), 0 0 50px rgba(168,85,247,.4); }
+    }
+    @keyframes borderGlow {
+      0%,100% { box-shadow: 0 0 8px rgba(34,211,238,.3); }
+      50%      { box-shadow: 0 0 18px rgba(168,85,247,.55); }
+    }
+    @keyframes floatY {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-6px); }
+    }
+    @keyframes fadeIn {
+      from { opacity:0; transform:translateY(10px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes scanline {
+      0%   { top:-4px; }
+      100% { top:100vh; }
+    }
+
+    #scanline {
+      position:fixed; left:0; width:100%; height:3px; z-index:0; pointer-events:none;
+      background:linear-gradient(90deg,transparent,rgba(34,211,238,.05),transparent);
+      animation:scanline 9s linear infinite;
+    }
+
+    /* ── NAVBAR ── */
+    #navbar {
+      position:sticky; top:0; z-index:100;
+      background:rgba(8,6,15,.96);
+      border-bottom:1.5px solid #2d1a4a;
+      padding:0 20px; height:68px;
+      display:flex; align-items:center; justify-content:space-between;
+      backdrop-filter:blur(20px);
+      box-shadow:0 4px 30px rgba(168,85,247,.08),0 1px 0 rgba(34,211,238,.1);
+    }
+    #logo-wrap { display:flex; align-items:center; gap:10px; cursor:pointer; }
+    #logo-box {
+      width:44px; height:44px; border-radius:10px; overflow:hidden;
+      border:1.5px solid rgba(34,211,238,.4);
+      animation:borderGlow 3s ease-in-out infinite; flex-shrink:0;
+    }
+    #logo-box img { width:100%; height:100%; object-fit:cover; display:block; }
+    .logo-fb { width:100%;height:100%;background:linear-gradient(135deg,#6b21a8,#0e7490);display:flex;align-items:center;justify-content:center;font-size:22px; }
+    .ll1 { font-family:'Press Start 2P',monospace; font-size:9px; letter-spacing:.5px; line-height:1.6; }
+    .ll1 .r{color:var(--red)} .ll1 .g{color:var(--gold)} .ll1 .c{color:var(--cyan)}
+    .ll2 { color:var(--purple); font-size:10px; font-family:'Oxanium',sans-serif; letter-spacing:2px; opacity:.7; }
+    #nav-btns { display:flex; gap:8px; align-items:center; }
+
+    .nbtn {
+      padding:8px 16px; border-radius:8px; cursor:pointer;
+      font-family:'Oxanium',sans-serif; font-size:12px; font-weight:700;
+      transition:all .15s; border:1.5px solid;
+    }
+    .nbtn-cyan   { background:linear-gradient(135deg,rgba(168,85,247,.2),rgba(34,211,238,.15)); border-color:var(--cyan); color:var(--cyan); box-shadow:0 0 12px rgba(34,211,238,.2); }
+    .nbtn-purple { background:transparent; border-color:var(--purple); color:var(--purple); box-shadow:0 0 10px rgba(168,85,247,.15); }
+    .nbtn-gray   { background:transparent; border-color:#2d1a4a; color:var(--muted); }
+    .nbtn-cyan:hover   { background:rgba(34,211,238,.15); }
+    .nbtn-purple:hover { background:rgba(168,85,247,.1); }
+    .nbtn-gray:hover   { border-color:#4b5563; color:#9ca3af; }
+
+    /* ── PAGES ── */
+    .page { display:none; }
+    .page.active { display:block; animation:fadeIn .25s ease; }
+    #login-page.active { display:flex; }
+
+    /* ── HERO ── */
+    #hero { text-align:center; padding:56px 24px 36px; position:relative; overflow:hidden; }
+    .hg1 { position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:600px;height:200px;background:radial-gradient(ellipse,rgba(168,85,247,.12) 0%,transparent 70%);pointer-events:none; }
+    .hg2 { position:absolute;bottom:0;left:20%;width:300px;height:100px;background:radial-gradient(ellipse,rgba(34,211,238,.08) 0%,transparent 70%);pointer-events:none; }
+    #hero-logo {
+      width:80px; height:80px; margin:0 auto 20px; border-radius:18px; overflow:hidden;
+      border:2px solid rgba(34,211,238,.5);
+      box-shadow:0 0 30px rgba(168,85,247,.5),0 0 60px rgba(34,211,238,.2);
+      animation:floatY 4s ease-in-out infinite;
+    }
+    #hero-logo img { width:100%; height:100%; object-fit:cover; display:block; }
+    #hero-title {
+      font-family:'Press Start 2P',monospace;
+      font-size:clamp(14px,3.5vw,26px); margin-bottom:8px;
+      animation:glowPulse 3s ease-in-out infinite; letter-spacing:2px;
+    }
+    #hero-sub { font-family:'Oxanium',sans-serif; font-size:13px; color:var(--purple); letter-spacing:4px; margin-bottom:36px; opacity:.8; }
+
+    /* SEARCH */
+    #sw { max-width:560px; margin:0 auto 20px; position:relative; }
+    #sw .ico { position:absolute; left:16px; top:50%; transform:translateY(-50%); font-size:16px; pointer-events:none; }
+    #si {
+      width:100%; padding:13px 18px 13px 46px;
+      background:rgba(45,26,74,.25); border:1.5px solid var(--bdr);
+      border-radius:10px; color:var(--text); font-size:15px;
+      font-family:'Rajdhani',sans-serif; outline:none;
+      transition:border-color .2s,box-shadow .2s;
+    }
+    #si:focus { border-color:var(--cyan); box-shadow:0 0 16px rgba(34,211,238,.15); }
+    #si::placeholder { color:#4b5563; }
+
+    /* CATS */
+    #cats { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+    .cat-btn {
+      padding:5px 14px; border-radius:20px; cursor:pointer;
+      border:1.5px solid #2d1a4a; background:transparent; color:var(--muted);
+      font-family:'Oxanium',sans-serif; font-size:12px; font-weight:600; transition:all .15s;
+    }
+    .cat-btn.active { border-color:var(--cyan); background:rgba(34,211,238,.12); color:var(--cyan); box-shadow:0 0 10px rgba(34,211,238,.15); }
+    .cat-btn:hover:not(.active) { border-color:#4b5563; color:#9ca3af; }
+
+    /* GRID */
+    #mgw { max-width:1200px; margin:0 auto; padding:0 20px 60px; }
+    #mg  { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:18px; }
+    #nr  { text-align:center; color:var(--dim); padding:80px 0; font-family:'Press Start 2P',monospace; font-size:11px; display:none; }
+
+    /* CARD */
+    .mc {
+      background:rgba(18,10,30,.92); border:1.5px solid #2d1a4a;
+      border-radius:13px; overflow:hidden; transition:all .2s; cursor:pointer;
+      box-shadow:0 2px 10px rgba(0,0,0,.4);
+    }
+    .mc:hover { border-color:var(--cyan); transform:translateY(-4px); box-shadow:0 10px 40px rgba(34,211,238,.12); }
+    .ci { position:relative; overflow:hidden; }
+    .ci img { width:100%; height:175px; object-fit:cover; display:block; transition:transform .35s; }
+    .mc:hover .ci img { transform:scale(1.05); }
+    .ciov { position:absolute;inset:0;background:linear-gradient(to bottom,transparent 55%,rgba(8,6,15,.85) 100%);pointer-events:none; }
+    .cbg { position:absolute;top:9px;border-radius:5px;padding:3px 8px;font-size:10px;font-family:'Oxanium',sans-serif;background:rgba(8,6,15,.85); }
+    .cbg-cat { left:9px; border:1px solid #6b21a8; color:var(--purple); }
+    .cbg-dl  { right:9px; border:1px solid #0e7490; color:var(--cyan); }
+    .cb { padding:14px; }
+    .ct { font-family:'Oxanium',sans-serif; font-weight:700; font-size:16px; color:var(--text); margin-bottom:6px; transition:color .15s; }
+    .mc:hover .ct { color:#fff; }
+    .cd { color:#4b5563; font-size:13px; line-height:1.5; margin-bottom:14px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .ca { display:flex; gap:8px; }
+    .btn-dl {
+      flex:1; text-align:center; padding:10px;
+      background:linear-gradient(135deg,rgba(107,33,168,.5),rgba(14,116,144,.5));
+      border:1.5px solid var(--cdim); border-radius:7px; color:var(--cyan);
+      font-family:'Oxanium',sans-serif; font-weight:700; font-size:12px;
+      letter-spacing:.5px; transition:all .2s; cursor:pointer; display:block; text-decoration:none;
+    }
+    .btn-dl:hover { border-color:var(--cyan); color:#fff; box-shadow:0 0 14px rgba(34,211,238,.25); }
+    .btn-del { padding:10px 12px; background:rgba(239,68,68,.08); border:1.5px solid #7f1d1d; border-radius:7px; color:#f87171; cursor:pointer; font-size:12px; transition:all .15s; }
+    .btn-del:hover { background:rgba(239,68,68,.18); }
+
+    /* ── COMMON FORM ── */
+    .fl { display:block; color:var(--cyan); font-size:12px; font-weight:600; margin-bottom:6px; font-family:'Oxanium',sans-serif; }
+    .fi {
+      width:100%; padding:11px 14px;
+      background:rgba(45,26,74,.15); border:1.5px solid var(--bdr);
+      border-radius:7px; color:var(--text); font-size:15px;
+      font-family:'Rajdhani',sans-serif; outline:none; transition:border-color .2s;
+    }
+    .fi:focus { border-color:var(--cyan); }
+    .fi::placeholder { color:#4b5563; }
+    select.fi { cursor:pointer; }
+    textarea.fi { resize:vertical; line-height:1.5; }
+    .fg { margin-bottom:16px; }
+    .btn-primary {
+      width:100%; padding:13px;
+      background:linear-gradient(135deg,#6b21a8,#0e7490);
+      border:1.5px solid var(--cyan); border-radius:9px; color:#fff;
+      font-size:14px; font-family:'Oxanium',sans-serif; font-weight:700;
+      cursor:pointer; letter-spacing:1px; box-shadow:0 0 20px rgba(34,211,238,.2); transition:all .15s;
+    }
+    .btn-primary:hover { box-shadow:0 0 28px rgba(34,211,238,.35); }
+    .btn-back { display:block; background:transparent; border:none; color:var(--muted); cursor:pointer; font-size:13px; font-family:'Oxanium',sans-serif; padding:8px; }
+    .btn-back:hover { color:var(--text); }
+
+    /* ── LOGIN ── */
+    #login-page { min-height:calc(100vh - 68px); align-items:center; justify-content:center; padding:40px 24px; }
+    .abox { background:var(--bgc); border:1.5px solid #3b1f6e; border-radius:18px; padding:40px; width:100%; max-width:400px; box-shadow:0 0 50px rgba(168,85,247,.12); }
+    .alogo { width:56px;height:56px;margin:0 auto 14px;border-radius:12px;overflow:hidden;border:1.5px solid rgba(168,85,247,.4); }
+    .alogo img { width:100%;height:100%;object-fit:cover;display:block; }
+    .atitle { font-family:'Press Start 2P',monospace; font-size:11px; color:var(--purple); text-align:center; margin-bottom:28px; }
+    .errmsg { color:#f87171; font-size:13px; text-align:center; font-family:'Oxanium',sans-serif; margin-bottom:14px; display:none; }
+    .hint { text-align:center; margin-top:10px; color:var(--dim); font-size:11px; font-family:'Oxanium',sans-serif; }
+
+    /* ── UPLOAD ── */
+    #upload-page { max-width:700px; margin:0 auto; padding:36px 24px 60px; }
+    .uph { display:flex; align-items:center; gap:12px; margin-bottom:28px; }
+    .uph h2 { font-family:'Press Start 2P',monospace; font-size:11px; color:var(--cyan); }
+    .upbox { background:var(--bgc); border:1.5px solid #3b1f6e; border-radius:16px; padding:32px; box-shadow:0 0 40px rgba(168,85,247,.08); }
+    .okmsg { background:rgba(34,211,238,.08); border:1.5px solid var(--cyan); border-radius:8px; padding:13px; text-align:center; color:var(--cyan); font-family:'Oxanium',sans-serif; font-weight:700; margin-bottom:22px; font-size:14px; display:none; }
+
+    /* Image upload area */
+    .img-area {
+      border:2px dashed var(--bdr); border-radius:10px;
+      padding:24px; text-align:center; cursor:pointer; transition:all .2s;
+      position:relative; min-height:120px;
+      display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px;
+    }
+    .img-area:hover { border-color:var(--purple); background:rgba(168,85,247,.05); }
+    .img-area input[type=file] { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%; }
+    .img-area-icon { font-size:28px; }
+    .img-area-label { color:var(--muted); font-family:'Oxanium',sans-serif; font-size:13px; }
+    #img-preview { display:none; width:100%; height:160px; object-fit:cover; border-radius:8px; margin-top:8px; border:1.5px solid var(--pdim); cursor:pointer; }
+
+    /* DL tabs */
+    .dltabs { display:flex; gap:8px; margin-bottom:14px; }
+    .dltab {
+      flex:1; padding:10px; text-align:center; border-radius:8px; cursor:pointer;
+      font-family:'Oxanium',sans-serif; font-size:13px; font-weight:600;
+      border:1.5px solid var(--bdr); background:transparent; color:var(--muted); transition:all .15s;
+    }
+    .dltab.active { border-color:var(--cyan); background:rgba(34,211,238,.1); color:var(--cyan); }
+    .dltab:hover:not(.active) { border-color:#4b5563; color:#9ca3af; }
+    .dlpanel { display:none; animation:fadeIn .2s ease; }
+    .dlpanel.active { display:block; }
+
+    /* File drop */
+    .fdrop {
+      border:2px dashed var(--bdr); border-radius:10px;
+      padding:28px; text-align:center; cursor:pointer; transition:all .2s;
+      position:relative;
+    }
+    .fdrop:hover { border-color:var(--cyan); background:rgba(34,211,238,.04); }
+    .fdrop.has { border-color:var(--cyan); border-style:solid; background:rgba(34,211,238,.06); }
+    .fdrop input[type=file] { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%; }
+    .fdrop-icon { font-size:28px; margin-bottom:8px; }
+    .fdrop-label { color:var(--muted); font-family:'Oxanium',sans-serif; font-size:13px; }
+    .fname { color:var(--cyan); font-family:'Oxanium',sans-serif; font-size:13px; font-weight:600; margin-top:8px; display:none; }
+    .tip { color:var(--muted); font-size:12px; font-family:'Oxanium',sans-serif; margin-top:6px; opacity:.7; }
+
+    /* ── MODAL ── */
+    #mov {
+      position:fixed; inset:0; z-index:200;
+      background:rgba(0,0,0,.88); backdrop-filter:blur(12px);
+      display:none; align-items:center; justify-content:center; padding:24px;
+    }
+    #mov.active { display:flex; }
+    #mbox {
+      background:var(--bgc); border:1.5px solid #3b1f6e;
+      border-radius:18px; max-width:520px; width:100%; overflow:hidden;
+      box-shadow:0 0 60px rgba(168,85,247,.2),0 0 120px rgba(34,211,238,.08);
+      animation:fadeIn .2s ease;
+    }
+    #miw { position:relative; }
+    #mimg { width:100%; height:200px; object-fit:cover; display:block; }
+    #miov { position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(8,6,15,.9) 100%); }
+    .mbadge { position:absolute;top:12px;border-radius:6px;padding:3px 10px;font-size:11px;font-family:'Oxanium',sans-serif;background:rgba(8,6,15,.85); }
+    #mbcat { left:12px; border:1px solid var(--pdim); color:var(--purple); }
+    #mbod { padding:22px; }
+    #mname { font-family:'Oxanium',sans-serif; font-weight:800; font-size:21px; color:var(--text); margin-bottom:8px; }
+    #mdesc { color:#9ca3af; font-size:14px; line-height:1.6; margin-bottom:20px; }
+    #mact { display:flex; gap:10px; }
+    #mdlbtn {
+      flex:1; display:block; text-align:center; padding:13px;
+      background:linear-gradient(135deg,#6b21a8,#0e7490);
+      border:1.5px solid var(--cyan); border-radius:9px; color:#fff;
+      font-family:'Oxanium',sans-serif; font-weight:700; font-size:14px;
+      box-shadow:0 0 16px rgba(34,211,238,.2); cursor:pointer; transition:all .15s;
+      text-decoration:none;
+    }
+    #mdlbtn:hover { box-shadow:0 0 28px rgba(34,211,238,.35); }
+    #mclose {
+      padding:13px 18px; background:transparent; border:1.5px solid #2d1a4a;
+      border-radius:9px; color:var(--muted); cursor:pointer;
+      font-family:'Oxanium',sans-serif; font-size:13px; transition:all .15s;
+    }
+    #mclose:hover { border-color:#4b5563; color:var(--text); }
+
+    footer {
+      border-top:1px solid #1a0f2e; padding:24px; text-align:center;
+      font-family:'Press Start 2P',monospace; font-size:8px; letter-spacing:1px; color:#2d1a4a;
+    }
+    footer .r{color:var(--red)} footer .g{color:var(--gold)} footer .c{color:var(--cyan)}
+
+    @media(max-width:480px){
+      #navbar{padding:0 12px;} .ll1{font-size:7px;}
+      .abox{padding:24px 18px;} .upbox{padding:22px 16px;}
+    }
+  </style>
+</head>
+<body>
+<div id="scanline"></div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <div id="logo-wrap" onclick="go('home')">
+    <div id="logo-box">
+      <!-- ĐỔI src THÀNH URL LOGO CỦA BẠN -->
+      <img src="YOUR_LOGO_URL_HERE" alt="Logo" onerror="this.parentNode.innerHTML='<div class=logo-fb>🐉</div>'" />
+    </div>
+    <div>
+      <div class="ll1"><span class="r">DRAGONS </span><span class="g">TORO </span><span class="c">MC</span></div>
+      <div class="ll2">MOD LIBRARY</div>
+    </div>
+  </div>
+  <div id="nav-btns">
+    <button class="nbtn nbtn-cyan"   id="n-post"   style="display:none" onclick="go('upload')">+ ĐĂNG MOD</button>
+    <button class="nbtn nbtn-purple" id="n-admin"  onclick="go('login')">⚔ ADMIN</button>
+    <button class="nbtn nbtn-gray"   id="n-logout" style="display:none" onclick="doLogout()">Đăng xuất</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div id="home-page" class="page active">
+  <div id="hero">
+    <div class="hg1"></div><div class="hg2"></div>
+    <div id="hero-logo">
+      <img src="YOUR_LOGO_URL_HERE" alt="Logo" onerror="this.parentNode.innerHTML='<div class=logo-fb style=border-radius:18px>🐉</div>'" />
+    </div>
+    <div id="hero-title">
+      <span style="color:var(--red)">DRAGONS </span>
+      <span style="color:var(--gold)">TORO </span>
+      <span style="color:var(--cyan)">MC</span>
+    </div>
+    <div id="hero-sub">MOD LIBRARY — TẢI MOD MIỄN PHÍ</div>
+    <div id="sw">
+      <span class="ico">🔍</span>
+      <input id="si" type="text" placeholder="Tìm kiếm mod..." oninput="render()" />
+    </div>
+    <div id="cats"></div>
+  </div>
+  <div id="mgw">
+    <div id="nr">Không tìm thấy mod nào...</div>
+    <div id="mg"></div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-page" class="page">
+  <div class="abox">
+    <div class="alogo">
+      <img src="YOUR_LOGO_URL_HERE" alt="Logo" onerror="this.parentNode.innerHTML='<div class=logo-fb>🐉</div>'" />
+    </div>
+    <div class="atitle">ADMIN LOGIN</div>
+    <div class="fg">
+      <label class="fl">Tài khoản</label>
+      <input class="fi" id="lu" type="text" placeholder="admin" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <div class="fg">
+      <label class="fl">Mật khẩu</label>
+      <input class="fi" id="lp" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <div class="errmsg" id="lerr">⚠ Sai tài khoản hoặc mật khẩu!</div>
+    <button class="btn-primary" onclick="doLogin()">⚔ ĐĂNG NHẬP</button>
+    <div class="hint">Demo: admin / admin123</div>
+    <button class="btn-back" style="width:100%;margin-top:10px" onclick="go('home')">← Quay lại</button>
+  </div>
+</div>
+
+<!-- UPLOAD -->
+<div id="upload-page" class="page">
+  <div class="uph">
+    <button class="btn-back" style="padding:4px 10px" onclick="go('home')">←</button>
+    <h2>ĐĂNG MOD MỚI</h2>
+  </div>
+  <div class="upbox">
+    <div class="okmsg" id="upok">✓ Đăng mod thành công!</div>
+
+    <!-- Tên -->
+    <div class="fg">
+      <label class="fl">Tên Mod *</label>
+      <input class="fi" id="un" type="text" placeholder="VD: OptiFine HD" />
+    </div>
+
+    <!-- Ảnh -->
+    <div class="fg">
+      <label class="fl">Ảnh Mod *</label>
+      <div class="img-area" id="img-area" onclick="document.getElementById('uif').click()">
+        <input type="file" id="uif" accept="image/*" onclick="event.stopPropagation()" onchange="prevImg(this)" />
+        <div class="img-area-icon">🖼️</div>
+        <div class="img-area-label">Bấm để chọn ảnh (JPG, PNG, GIF...)</div>
+      </div>
+      <img id="img-preview" src="" onclick="document.getElementById('uif').click()" title="Bấm để đổi ảnh" />
+    </div>
+
+    <!-- Mô tả -->
+    <div class="fg">
+      <label class="fl">Mô tả Mod *</label>
+      <textarea class="fi" id="ud" rows="3" placeholder="Mô tả ngắn về mod này..."></textarea>
+    </div>
+
+    <!-- Download type -->
+    <div class="fg">
+      <label class="fl">Kiểu Tải Xuống *</label>
+      <div class="dltabs">
+        <button class="dltab active" id="tab-link" onclick="switchTab('link')">🔗 Link ngoài</button>
+        <button class="dltab"        id="tab-file" onclick="switchTab('file')">📦 Upload file mod</button>
+      </div>
+
+      <!-- Link panel -->
+      <div class="dlpanel active" id="panel-link">
+        <input class="fi" id="uu" type="text" placeholder="https://mediafire.com/... hoặc link bất kỳ" />
+        <div class="tip">Người dùng bấm DOWNLOAD → mở link này trong tab mới</div>
+      </div>
+
+      <!-- File panel -->
+      <div class="dlpanel" id="panel-file">
+        <div class="fdrop" id="fdrop">
+          <input type="file" id="umf" accept=".jar,.zip,.rar,.7z" onchange="prevFile(this)" />
+          <div class="fdrop-icon">📦</div>
+          <div class="fdrop-label">Bấm để chọn file mod (.jar, .zip, .rar, .7z)</div>
+          <div class="fname" id="fname"></div>
+        </div>
+        <div class="tip">⚠ File lưu trong trình duyệt. File lớn (&gt;5MB) nên dùng link ngoài cho ổn định hơn.</div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="doUpload()">⬆ ĐĂNG MOD</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="mov" onclick="closeModal()">
+  <div id="mbox" onclick="event.stopPropagation()">
+    <div id="miw">
+      <img id="mimg" src="" alt="" />
+      <div id="miov"></div>
+      <div class="mbadge" id="mbcat"></div>
+    </div>
+    <div id="mbod">
+      <div id="mname"></div>
+      <div id="mdesc"></div>
+      <div id="mact">
+        <button id="mdlbtn" onclick="doMDL()">⬇ DOWNLOAD</button>
+        <button id="mclose" onclick="closeModal()">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="r">DRAGONS </span><span class="g">TORO </span><span class="c">MC</span>
+  <span> • MOD LIBRARY © 2024</span>
+</footer>
+
+<script>
+/* ─────────────── CONFIG ─────────────── */
+const ADMIN_U = 'admin';
+const ADMIN_P = 'admin123';
+const SK      = 'dtmc_v3';
+const CATS    = ['Tất cả','Fabric','Forge','OptiFine','Utility','World Gen','Magic','Tech','Adventure','Other'];
+
+let isAdmin = false, curCat = 'Tất cả', mods = [], curMod = null;
+let dlType = 'link', imgData = null, fileData = null;
+
+const SAMPLE = [
+  { id:1, name:'OptiFine HD',
+    desc:'Tối ưu đồ họa Minecraft, hỗ trợ shader, tăng FPS đáng kể. Mod thiết yếu cho mọi người chơi.',
+    image:'https://placehold.co/400x220/1a0a2e/22d3ee?text=OptiFine+HD&font=montserrat',
+    dlType:'link', dlUrl:'https://optifine.net', cat:'OptiFine' },
+  { id:2, name:'JEI — Just Enough Items',
+    desc:'Xem công thức craft của tất cả item trong game. Không thể thiếu khi chơi modpack.',
+    image:'https://placehold.co/400x220/200a2e/a855f7?text=JEI+Mod&font=montserrat',
+    dlType:'link', dlUrl:'https://www.curseforge.com', cat:'Utility' },
+  { id:3, name:"Biomes O' Plenty",
+    desc:'Thêm hơn 80 biome mới vào thế giới Minecraft với cây cối, hoa và sinh vật độc đáo.',
+    image:'https://placehold.co/400x220/2a0a0a/f87171?text=Biomes+O+Plenty&font=montserrat',
+    dlType:'link', dlUrl:'https://www.curseforge.com', cat:'World Gen' },
+];
+
+/* ─────────────── INIT ─────────────── */
+function init() {
+  try { mods = JSON.parse(localStorage.getItem(SK)) || SAMPLE; }
+  catch { mods = SAMPLE; }
+  buildCats(); render();
+}
+function save() {
+  try { localStorage.setItem(SK, JSON.stringify(mods)); }
+  catch { alert('File mod quá lớn để lưu! Hãy dùng link ngoài thay vì upload file.'); }
+}
+
+/* ─────────────── NAV ─────────────── */
+function go(page) {
+  ['home','login','upload'].forEach(p => {
+    const el = document.getElementById(p+'-page');
+    el.classList.remove('active');
+    el.style.display = 'none';
+  });
+  const t = document.getElementById(page+'-page');
+  t.style.display = (page === 'login') ? 'flex' : 'block';
+  requestAnimationFrame(() => t.classList.add('active'));
+  window.scrollTo(0,0);
+}
+
+/* ─────────────── CATS ─────────────── */
+function buildCats() {
+  const w = document.getElementById('cats');
+  w.innerHTML = '';
+  CATS.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'cat-btn' + (c === curCat ? ' active' : '');
+    b.textContent = c;
+    b.onclick = () => { curCat = c; buildCats(); render(); };
+    w.appendChild(b);
+  });
+}
+
+/* ─────────────── RENDER ─────────────── */
+function render() {
+  const q = (document.getElementById('si').value || '').toLowerCase();
+  const list = mods.filter(m =>
+    (m.name.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q)) &&
+    (curCat === 'Tất cả' || m.cat === curCat)
+  );
+  const grid = document.getElementById('mg');
+  const nr   = document.getElementById('nr');
+  grid.innerHTML = '';
+  if (!list.length) { nr.style.display = 'block'; return; }
+  nr.style.display = 'none';
+  list.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'mc';
+    const badge = m.dlType === 'file' ? '📦 Có file' : '🔗 Link';
+    div.innerHTML = `
+      <div class="ci" onclick="openModal(${m.id})">
+        <img src="${x(m.image)}" alt="${x(m.name)}" loading="lazy"
+             onerror="this.src='https://placehold.co/400x220/1a0a2e/22d3ee?text=No+Image'" />
+        <div class="ciov"></div>
+        <div class="cbg cbg-cat">${x(m.cat)}</div>
+        <div class="cbg cbg-dl">${badge}</div>
+      </div>
+      <div class="cb">
+        <div class="ct" onclick="openModal(${m.id})">${x(m.name)}</div>
+        <div class="cd">${x(m.desc)}</div>
+        <div class="ca">
+          <button class="btn-dl" onclick="dl(${m.id},event)">⬇ DOWNLOAD</button>
+          ${isAdmin ? `<button class="btn-del" onclick="del(${m.id},event)">🗑</button>` : ''}
+        </div>
+      </div>`;
+    grid.appendChild(div);
+  });
+}
+
+/* ─────────────── DOWNLOAD ─────────────── */
+function dl(id, e) {
+  if (e) e.stopPropagation();
+  const m = mods.find(m => m.id === id);
+  if (!m) return;
+  if (m.dlType === 'link') {
+    window.open(m.dlUrl, '_blank', 'noopener,noreferrer');
+  } else if (m.dlType === 'file' && m.fileData) {
+    const a = document.createElement('a');
+    a.href = m.fileData;
+    a.download = m.fileName || m.name + '.jar';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+}
+
+/* ─────────────── MODAL ─────────────── */
+function openModal(id) {
+  curMod = mods.find(m => m.id === id);
+  if (!curMod) return;
+  const img = document.getElementById('mimg');
+  img.src = curMod.image;
+  img.onerror = () => img.src = 'https://placehold.co/400x220/1a0a2e/22d3ee?text=No+Image';
+  document.getElementById('mbcat').textContent  = curMod.cat;
+  document.getElementById('mname').textContent  = curMod.name;
+  document.getElementById('mdesc').textContent  = curMod.desc;
+  document.getElementById('mdlbtn').textContent = curMod.dlType === 'file' ? '📦 TẢI FILE MOD' : '⬇ DOWNLOAD';
+  document.getElementById('mov').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('mov').classList.remove('active');
+  document.body.style.overflow = '';
+}
+function doMDL() { if (curMod) dl(curMod.id, null); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ─────────────── AUTH ─────────────── */
+function doLogin() {
+  const u = document.getElementById('lu').value.trim();
+  const p = document.getElementById('lp').value;
+  const err = document.getElementById('lerr');
+  if (u === ADMIN_U && p === ADMIN_P) {
+    isAdmin = true; err.style.display = 'none';
+    document.getElementById('n-post').style.display   = '';
+    document.getElementById('n-admin').style.display  = 'none';
+    document.getElementById('n-logout').style.display = '';
+    go('home'); render();
+  } else { err.style.display = 'block'; }
+}
+function doLogout() {
+  isAdmin = false;
+  document.getElementById('n-post').style.display   = 'none';
+  document.getElementById('n-admin').style.display  = '';
+  document.getElementById('n-logout').style.display = 'none';
+  go('home'); render();
+}
+
+/* ─────────────── UPLOAD FORM ─────────────── */
+function switchTab(t) {
+  dlType = t;
+  document.getElementById('tab-link').classList.toggle('active', t==='link');
+  document.getElementById('tab-file').classList.toggle('active', t==='file');
+  document.getElementById('panel-link').classList.toggle('active', t==='link');
+  document.getElementById('panel-file').classList.toggle('active', t==='file');
+}
+
+function prevImg(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    imgData = e.target.result;
+    const prev = document.getElementById('img-preview');
+    prev.src = imgData; prev.style.display = 'block';
+    document.getElementById('img-area').style.display = 'none';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function prevFile(input) {
+  if (!input.files || !input.files[0]) return;
+  const f = input.files[0];
+  document.getElementById('fname').textContent = '✅ ' + f.name;
+  document.getElementById('fname').style.display = 'block';
+  document.getElementById('fdrop').classList.add('has');
+  const reader = new FileReader();
+  reader.onload = e => { fileData = e.target.result; };
+  reader.readAsDataURL(f);
+}
+
+function doUpload() {
+  const name = document.getElementById('un').value.trim();
+  const desc = document.getElementById('ud').value.trim();
+  if (!name)    { alert('Vui lòng nhập tên mod!'); return; }
+  if (!desc)    { alert('Vui lòng nhập mô tả!'); return; }
+  if (!imgData) { alert('Vui lòng chọn ảnh mod!'); return; }
+
+  const m = { id: Date.now(), name, desc, image: imgData, cat: 'Other', dlType };
+
+  if (dlType === 'link') {
+    const url = document.getElementById('uu').value.trim();
+    if (!url) { alert('Vui lòng nhập link tải!'); return; }
+    m.dlUrl = url;
+  } else {
+    if (!fileData) { alert('Vui lòng chọn file mod!'); return; }
+    m.fileData = fileData;
+    const fi = document.getElementById('umf');
+    m.fileName = fi.files[0] ? fi.files[0].name : name + '.jar';
+  }
+
+  mods.unshift(m); save();
+
+  // reset
+  document.getElementById('un').value = '';
+  document.getElementById('ud').value = '';
+  document.getElementById('uu').value = '';
+  document.getElementById('umf').value = '';
+  document.getElementById('img-preview').style.display = 'none';
+  document.getElementById('img-area').style.display = 'flex';
+  document.getElementById('fname').style.display = 'none';
+  document.getElementById('fdrop').classList.remove('has');
+  imgData = null; fileData = null;
+  switchTab('link');
+
+  const ok = document.getElementById('upok');
+  ok.style.display = 'block';
+  setTimeout(() => { ok.style.display = 'none'; go('home'); render(); }, 1800);
+}
+
+/* ─────────────── DELETE ─────────────── */
+function del(id, e) {
+  e.stopPropagation();
+  if (!confirm('Xóa mod này?')) return;
+  mods = mods.filter(m => m.id !== id); save(); render();
+}
+
+/* ─────────────── UTILS ─────────────── */
+function x(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+init(); go('home');
+</script>
+</body>
+</html>
