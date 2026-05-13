@@ -41,7 +41,6 @@
       position: relative;
     }
 
-    /* Animated Background */
     body::before {
       content: '';
       position: fixed;
@@ -61,7 +60,6 @@
       z-index: -2;
     }
 
-    /* Floating particles */
     .particles {
       position: fixed;
       top: 0;
@@ -87,12 +85,10 @@
       100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
     }
 
-    /* Scrollbar */
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: var(--darker); }
     ::-webkit-scrollbar-thumb { background: var(--gradient-1); border-radius: 4px; }
 
-    /* Navbar */
     .navbar {
       position: sticky;
       top: 0;
@@ -212,7 +208,6 @@
       color: var(--gold);
     }
 
-    /* Pages */
     .page {
       display: none;
       animation: fadeIn 0.4s ease;
@@ -226,7 +221,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Hero Section */
     .hero {
       text-align: center;
       padding: 80px 20px 60px;
@@ -279,7 +273,6 @@
       letter-spacing: 2px;
     }
 
-    /* Search */
     .search-wrapper {
       max-width: 600px;
       margin: 40px auto 30px;
@@ -312,7 +305,6 @@
       box-shadow: 0 0 20px rgba(255, 62, 108, 0.2);
     }
 
-    /* Categories */
     .categories {
       display: flex;
       gap: 10px;
@@ -345,7 +337,6 @@
       color: white;
     }
 
-    /* Mod Grid */
     .mods-container {
       max-width: 1400px;
       margin: 0 auto;
@@ -366,7 +357,6 @@
       display: none;
     }
 
-    /* Mod Card */
     .mod-card {
       background: var(--card-bg);
       backdrop-filter: blur(10px);
@@ -506,7 +496,6 @@
       color: white;
     }
 
-    /* Login Box */
     .login-box {
       background: var(--card-bg);
       backdrop-filter: blur(20px);
@@ -580,7 +569,6 @@
       color: var(--text-muted);
     }
 
-    /* Upload Page */
     .upload-container {
       max-width: 800px;
       margin: 40px auto;
@@ -638,6 +626,24 @@
       border-color: var(--secondary);
     }
 
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      margin-top: 15px;
+      display: none;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: var(--gradient-1);
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+
     .tab-buttons {
       display: flex;
       gap: 10px;
@@ -681,7 +687,6 @@
       display: none;
     }
 
-    /* Modal */
     .modal {
       position: fixed;
       top: 0;
@@ -737,7 +742,6 @@
       gap: 15px;
     }
 
-    /* Footer */
     .footer {
       border-top: 1px solid rgba(255, 255, 255, 0.05);
       padding: 30px;
@@ -872,11 +876,12 @@
           <div class="file-upload-area" onclick="document.getElementById('fileInput').click()">
             <i class="fas fa-file-archive" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
             <span>Bấm để chọn file mod (.jar, .zip, .rar, .7z)</span>
-            <span style="font-size: 11px; display: block; margin-top: 5px; opacity:0.7">📦 Tối đa 4GB</span>
+            <span style="font-size: 11px; display: block; margin-top: 5px; opacity:0.7">📦 Tối đa 3GB (Chrome/Edge)</span>
             <input type="file" id="fileInput" accept=".jar,.zip,.rar,.7z" style="display:none" onchange="previewFile(this)">
           </div>
           <div id="fileName" style="color: var(--secondary); font-size: 12px; margin-top: 10px; text-align: center; display: none;"></div>
-          <div class="hint-text" style="margin-top:10px">⚠️ File lưu trong trình duyệt, sẽ mất nếu xóa cache</div>
+          <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="hint-text" style="margin-top:10px">⚠️ File được lưu trong bộ nhớ trình duyệt, xóa cache sẽ mất file!</div>
         </div>
       </div>
       
@@ -907,8 +912,8 @@
 
 <script>
 // === CONFIG ===
-const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'admin123';
+const A = Buffer.from('YWRtaW4=', 'base64').toString();     // 'admin'
+const S = Buffer.from('YWRtaW4xMjM=', 'base64').toString(); // 'admin123'
 
 let isAdmin = false;
 let currentCategory = 'Tất cả';
@@ -918,17 +923,21 @@ let uploadType = 'link';
 let imageData = null;
 let fileData = null;
 let selectedFileName = null;
+let currentFileObject = null;  // Lưu file object gốc để upload lớn
 
 const categories = ['Tất cả', 'Fabric', 'Forge', 'OptiFine', 'Utility', 'World Gen', 'Magic', 'Tech', 'Adventure', 'Other'];
 
 // IndexedDB
 let db = null;
-const DB_NAME = 'DTMC_Mods_V2';
+const DB_NAME = 'DTMC_Mods_V3';
 const STORE_NAME = 'mods_store';
+
+// OPFS
+let opfsRoot = null;
 
 function initDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
+    const request = indexedDB.open(DB_NAME, 2);
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
       db = request.result;
@@ -942,13 +951,34 @@ function initDB() {
   });
 }
 
+async function initOPFS() {
+  if ('storage' in navigator && 'getDirectory' in navigator.storage) {
+    try {
+      opfsRoot = await navigator.storage.getDirectory();
+      console.log('✅ OPFS ready - support file up to 3GB');
+      return true;
+    } catch (e) {
+      console.warn('OPFS error:', e);
+      return false;
+    }
+  }
+  console.warn('⚠️ OPFS not supported, file upload limit 2GB');
+  return false;
+}
+
 async function saveMods() {
   if (!db) return;
   const tx = db.transaction(STORE_NAME, 'readwrite');
   const store = tx.objectStore(STORE_NAME);
   store.clear();
   for (const mod of mods) {
-    store.put({ ...mod });
+    const modToSave = { ...mod };
+    // Không lưu fileData quá lớn vào IndexedDB
+    if (modToSave.fileData && modToSave.fileData.length > 5000000) {
+      modToSave.isLargeFile = true;
+      modToSave.fileData = null;
+    }
+    store.put(modToSave);
   }
 }
 
@@ -966,17 +996,23 @@ async function deleteModFromDB(id) {
   if (!db) return;
   const tx = db.transaction(STORE_NAME, 'readwrite');
   tx.objectStore(STORE_NAME).delete(id);
+  
+  if (opfsRoot) {
+    try {
+      await opfsRoot.removeEntry(`mod_${id}.jar`);
+    } catch(e) {}
+  }
 }
 
-// Sample data
 const sampleMods = [
-  { id: 1, name: 'OptiFine HD', desc: 'Tối ưu đồ họa Minecraft, hỗ trợ shader, tăng FPS đáng kể. Mod thiết yếu cho mọi game thủ.', image: 'https://placehold.co/400x220/ff3e6c/ffffff?text=OptiFine+HD', dlType: 'link', dlUrl: 'https://optifine.net', cat: 'OptiFine' },
-  { id: 2, name: 'JEI - Just Enough Items', desc: 'Xem công thức craft của tất cả item trong game. Không thể thiếu khi chơi modpack.', image: 'https://placehold.co/400x220/9b4dff/ffffff?text=JEI+Mod', dlType: 'link', dlUrl: 'https://www.curseforge.com', cat: 'Utility' },
-  { id: 3, name: 'Biomes O\' Plenty', desc: 'Thêm hơn 80 biome mới vào thế giới Minecraft với cây cối, hoa và sinh vật độc đáo.', image: 'https://placehold.co/400x220/ffb347/ffffff?text=Biomes', dlType: 'link', dlUrl: 'https://www.curseforge.com', cat: 'World Gen' }
+  { id: 1, name: 'OptiFine HD', desc: 'Tối ưu đồ họa Minecraft, hỗ trợ shader, tăng FPS đáng kể.', image: 'https://placehold.co/400x220/ff3e6c/ffffff?text=OptiFine+HD', dlType: 'link', dlUrl: 'https://optifine.net', cat: 'OptiFine' },
+  { id: 2, name: 'JEI - Just Enough Items', desc: 'Xem công thức craft của tất cả item.', image: 'https://placehold.co/400x220/9b4dff/ffffff?text=JEI+Mod', dlType: 'link', dlUrl: 'https://www.curseforge.com', cat: 'Utility' },
+  { id: 3, name: 'Biomes O\' Plenty', desc: 'Thêm hơn 80 biome mới.', image: 'https://placehold.co/400x220/ffb347/ffffff?text=Biomes', dlType: 'link', dlUrl: 'https://www.curseforge.com', cat: 'World Gen' }
 ];
 
 async function init() {
   await initDB();
+  await initOPFS();
   const loaded = await loadModsFromDB();
   if (loaded.length === 0) {
     mods = sampleMods;
@@ -1052,18 +1088,38 @@ function escapeHtml(str) {
   });
 }
 
-function downloadMod(id) {
+async function downloadMod(id) {
   const mod = mods.find(m => m.id === id);
   if (!mod) return;
   if (mod.dlType === 'link') {
     window.open(mod.dlUrl, '_blank');
-  } else if (mod.dlType === 'file' && mod.fileData) {
-    const a = document.createElement('a');
-    a.href = mod.fileData;
-    a.download = mod.fileName || mod.name + '.jar';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  } else if (mod.dlType === 'file') {
+    if (mod.isLargeFile && opfsRoot) {
+      // Tải từ OPFS
+      try {
+        const fileHandle = await opfsRoot.getFileHandle(`mod_${mod.id}.jar`);
+        const file = await fileHandle.getFile();
+        const url = URL.createObjectURL(file);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = mod.fileName || mod.name + '.jar';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch(e) {
+        alert('❌ Không thể tải file! File có thể đã bị xóa.');
+      }
+    } else if (mod.fileData) {
+      const a = document.createElement('a');
+      a.href = mod.fileData;
+      a.download = mod.fileName || mod.name + '.jar';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } else {
+      alert('❌ File không tồn tại!');
+    }
   }
 }
 
@@ -1095,11 +1151,11 @@ function go(page) {
 }
 
 function doLogin() {
-  const user = document.getElementById('loginUser').value.trim();
-  const pass = document.getElementById('loginPass').value;
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
   const error = document.getElementById('loginError');
   
-  if (user === ADMIN_USER && pass === ADMIN_PASS) {
+  if (u === A && p === S) {
     isAdmin = true;
     error.style.display = 'none';
     document.getElementById('postBtn').style.display = '';
@@ -1144,19 +1200,38 @@ function previewImage(input) {
   }
 }
 
-function previewFile(input) {
+async function previewFile(input) {
   if (input.files && input.files[0]) {
     const file = input.files[0];
+    const fileSizeGB = file.size / (1024 * 1024 * 1024);
+    
+    if (fileSizeGB > 3) {
+      alert(`❌ File quá lớn! Giới hạn 3GB. File của bạn: ${fileSizeGB.toFixed(2)}GB`);
+      input.value = '';
+      return;
+    }
+    
     selectedFileName = file.name;
-    document.getElementById('fileName').textContent = `✅ ${selectedFileName}`;
+    currentFileObject = file;
+    document.getElementById('fileName').textContent = `✅ ${selectedFileName} (${fileSizeGB.toFixed(2)}GB)`;
     document.getElementById('fileName').style.display = 'block';
     document.querySelector('.file-upload-area').style.borderColor = 'var(--secondary)';
     
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      fileData = e.target.result;
-    };
-    reader.readAsDataURL(file);
+    // Nếu file < 500MB thì dùng Base64, nếu lớn hơn thì dùng OPFS
+    if (file.size < 500 * 1024 * 1024) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        fileData = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      fileData = null;
+      if (!opfsRoot) {
+        alert('⚠️ Trình duyệt không hỗ trợ file lớn! Vui lòng dùng Chrome/Edge mới nhất.');
+        input.value = '';
+        currentFileObject = null;
+      }
+    }
   }
 }
 
@@ -1169,8 +1244,9 @@ async function doUpload() {
   if (!desc) { alert('❌ Vui lòng nhập mô tả!'); return; }
   if (!imageData) { alert('❌ Vui lòng chọn ảnh mod!'); return; }
   
+  const newId = Date.now();
   const newMod = {
-    id: Date.now(),
+    id: newId,
     name: name,
     desc: desc,
     image: imageData,
@@ -1183,9 +1259,52 @@ async function doUpload() {
     if (!url) { alert('❌ Vui lòng nhập link tải!'); return; }
     newMod.dlUrl = url;
   } else {
-    if (!fileData) { alert('❌ Vui lòng chọn file mod!'); return; }
-    newMod.fileData = fileData;
+    if (!currentFileObject && !fileData) { 
+      alert('❌ Vui lòng chọn file mod!'); 
+      return; 
+    }
+    
     newMod.fileName = selectedFileName || name + '.jar';
+    
+    if (fileData) {
+      // File nhỏ, lưu Base64
+      newMod.fileData = fileData;
+      newMod.isLargeFile = false;
+    } else if (currentFileObject && opfsRoot) {
+      // File lớn, lưu vào OPFS
+      newMod.isLargeFile = true;
+      newMod.fileData = null;
+      
+      // Hiển thị progress bar
+      const progressBar = document.getElementById('progressBar');
+      const progressFill = document.getElementById('progressFill');
+      progressBar.style.display = 'block';
+      progressFill.style.width = '0%';
+      
+      // Lưu file vào OPFS
+      const fileHandle = await opfsRoot.getFileHandle(`mod_${newId}.jar`, { create: true });
+      const writable = await fileHandle.createWritable();
+      
+      const stream = currentFileObject.stream();
+      const writer = writable.getWriter();
+      const reader = stream.getReader();
+      
+      let written = 0;
+      const total = currentFileObject.size;
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        await writer.write(value);
+        written += value.length;
+        const percent = (written / total) * 100;
+        progressFill.style.width = percent + '%';
+      }
+      
+      await writer.close();
+      await writable.close();
+      progressBar.style.display = 'none';
+    }
   }
   
   mods.unshift(newMod);
@@ -1201,6 +1320,7 @@ async function doUpload() {
   document.getElementById('fileInput').value = '';
   imageData = null;
   fileData = null;
+  currentFileObject = null;
   switchTab('link');
   
   const successMsg = document.getElementById('successMsg');
@@ -1235,7 +1355,6 @@ function createParticles() {
   }
 }
 
-// Event listeners
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeModal();
   if (e.key === 'Enter' && document.getElementById('login-page').classList.contains('active')) {
